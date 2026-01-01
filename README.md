@@ -26,7 +26,7 @@ Buka browser dan akses:
 http://localhost:8080
 Klik tombol "Start Connection" pada halaman web.
 
-🛠 Cara Menggunakan
+Cara Menggunakan
 Koneksi: Setelah tombol "Start Connection" diklik, perhatikan status berubah menjadi Connected.
 
 Streaming Server: Di kotak Log, Anda akan melihat server secara otomatis mengirimkan Waktu Server setiap detik. Ini membuktikan adanya koneksi persisten.
