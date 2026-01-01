@@ -4,12 +4,12 @@ Proyek ini adalah implementasi sederhana namun fungsional dari teknologi **WebRT
 
 Aplikasi ini mendemonstrasikan bagaimana server Golang dapat bertindak sebagai *Peer* WebRTC untuk melakukan streaming data secara *real-time* (bi-directional) ke browser klien tanpa menggunakan HTTP Polling atau WebSocket standar, melainkan menggunakan protokol SCTP/UDP melalui WebRTC.
 
-## 📋 Prasyarat
+## Prasyarat
 
 - **Go (Golang)** versi 1.20 atau yang lebih baru.
 - Web Browser modern (Chrome, Firefox, Edge, atau Safari).
 
-## 🚀 Cara Menjalankan Aplikasi
+## Cara Menjalankan Aplikasi
 
 1. **Clone atau Download** repository ini.
 2. Buka terminal di dalam folder proyek.
@@ -33,7 +33,7 @@ Streaming Server: Di kotak Log, Anda akan melihat server secara otomatis mengiri
 
 Kirim Pesan: Ketik pesan di kolom input dan tekan Send. Server akan membalas (echo) pesan Anda melalui jalur data WebRTC yang sama.
 
-📚 Penjelasan Teknis (Cara Kerja)
+Penjelasan Teknis (Cara Kerja)
 Aplikasi ini bekerja dalam dua fase utama: Signaling (Sinyalisasi) dan Data Transfer.
 
 1. Signaling (HTTP Handshake)
