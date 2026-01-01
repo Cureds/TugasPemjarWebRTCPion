@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pion WebRTC Assignment</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        #logs { background: #f0f0f0; border: 1px solid #ccc; padding: 1rem; height: 300px; overflow-y: scroll; font-family: monospace; }
+        .input-group { margin-top: 1rem; display: flex; gap: 10px; }
+        input { flex-grow: 1; padding: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Golang Pion WebRTC Implementation</h2>
+    <p>Status: <span id="status">Disconnected</span></p>
+
+    <div id="logs"></div>
+
+    <div class="input-group">
+        <input type="text" id="msgInput" placeholder="Type a message to the server..." disabled>
+        <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
+    </div>
+    <br>
+    <button onclick="startSession()">Start Connection</button>
+
+    <script>
+        let pc = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+        let logDiv = document.getElementById('logs');
+        let dataChannel;
+
+        function log(msg) {
+            logDiv.innerHTML += `<div>${msg}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function startSession() {
+            document.getElementById('status').innerText = "Connecting...";
+            
+            // Create Data Channel
+            dataChannel = pc.createDataChannel("chat");
+            
+            dataChannel.onopen = () => {
+                document.getElementById('status').innerText = "Connected (Data Channel Open)";
+                document.getElementById('msgInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                log("<b>CHANNEL OPEN:</b> You can now chat with the Go server.");
+            };
+
+            dataChannel.onmessage = (event) => {
+                log(`<span style="color: blue;">[Server]: ${event.data}</span>`);
+            };
+
+            pc.onicecandidate = event => {
+                if (event.candidate === null) {
+                    // ICE Gathering finished (we handle this in the fetch below)
+                }
+            };
+
+            // Create Offer
+            pc.createOffer().then(d => pc.setLocalDescription(d)).catch(log);
+
+            // Wait for ICE gathering to complete before sending request to server
+            // (A simple trick to send all candidates in one SDP blob)
+            pc.onicegatheringstatechange = () => {
+                if (pc.iceGatheringState === 'complete') {
+                    sendOfferToServer();
+                }
+            };
+        }
+
+        function sendOfferToServer() {
+            fetch('/sdp', {
+                method: 'POST',
+                body: JSON.stringify({ sdp: pc.localDescription.sdp }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Receive Answer from Server
+                let answer = new RTCSessionDescription({
+                    type: 'answer',
+                    sdp: data.sdp
+                });
+                pc.setRemoteDescription(answer);
+            })
+            .catch(e => log(e));
+        }
+
+        function sendMessage() {
+            let input = document.getElementById('msgInput');
+            let msg = input.value;
+            if (msg && dataChannel) {
+                dataChannel.send(msg);
+                log(`[You]: ${msg}`);
+                input.value = '';
+            }
+        }
+    </script>
+</body>
+</html>
